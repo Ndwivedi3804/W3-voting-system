@@ -1,0 +1,200 @@
+
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Voting System</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; background: linear-gradient(to right, #ece9e6, #ffffff); }
+        h1 { color: #8c8e85; text-align: center; margin-bottom: 30px; }
+        .container {
+            max-width: 600px; margin: 50px auto; background: rgb(66, 5, 69); 
+            padding: 40px; border-radius: 15px; box-shadow: 0 8px 20px rgba(26, 8, 84, 0.2);
+            animation: fadeIn 1s ease-in;
+        }
+        label, input, select {
+            width: 100%; font-size: 18px; margin: 15px 0; color: #555;
+        }
+        input, select {
+            padding: 10px; border: 2px solid #ccc; border-radius: 5px;
+        }
+        button {
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; 
+            color: rgb(79, 183, 155); background: #007bff; border: none; border-radius: 5px;
+            cursor: pointer; margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        button:hover { background: #0056b3; }
+        #status {
+            margin-top: 20px; padding: 15px; font-size: 16px; 
+            border-radius: 5px; text-align: center;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Blockchain Based Voting System</h1>
+    <label for="aadhaar">Enter Aadhaar/Voter ID:</label>
+    <input type="text" id="aadhaar" placeholder="Enter your Aadhaar or Voter ID">
+    <label for="candidate">Select Candidate:</label>
+    <select id="candidate">
+        <option value="1">candidate  1</option>
+        <option value="2">candidate 2</option>
+        <option value="3">candidate 3</option>
+        <option value="4">candidate 4</option>
+    </select>
+    <button id="voteButton">Vote</button>
+    <p id="status"></p>
+</div>
+
+<script>
+if (typeof window.ethereum !== 'undefined') {
+    const web3 = new Web3(window.ethereum);
+    let userAccount;
+
+    async function init() {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
+        userAccount = accounts[0];
+        console.log("User Account:", userAccount);
+    }
+
+    async function vote() {
+        const aadhaar = document.getElementById("aadhaar").value;
+        const candidateId = document.getElementById("candidate").value;
+
+        if (!aadhaar || aadhaar.length < 12) {
+            document.getElementById("status").innerHTML = "Please enter a valid Aadhaar/Voter ID.";
+            document.getElementById("status").className = "voter Authentication sucessfull";
+            return;
+        }
+
+        const contractAddress = "0xYourSmartContractAddress";  
+        const contractABI = [
+            {
+                "constant": false,
+                "inputs": [{"name": "aadhaar", "type": "string"}, {"name": "candidateId", "type": "uint256"}],
+                "name": "voteForCandidate",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        document.getElementById("status").innerHTML = "Voting...";
+        document.getElementById("status").className = "";
+
+        try {
+            const receipt = await contract.methods.voteForCandidate(aadhaar, candidateId).send({ from: userAccount });
+            document.getElementById("status").innerHTML = `Vote successful! Transaction Hash: ${receipt.transactionHash}`;
+            document.getElementById("status").className = "success";
+            console.log("Vote successful", receipt);
+        } catch (error) {
+            document.getElementById("status").innerHTML = `Error: ${error.message}`;
+            document.getElementById("status").className = "error";
+            console.error("Error", error);
+        }
+    }
+
+    document.getElementById("voteButton").addEventListener("click", vote);
+    window.addEventListener('load', init);
+}
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Based Voting System</title>
+</head>
+<body>
+    <h1>Blockchain Voting System</h1>
+
+    <form id="voteForm">
+        <label for="candidate">Vote For A Candidate:</label><br>
+        ><input type="radio" name="candidate" value="A" required> Candidate A <br
+        ><input type="radio" name="candidate" value="A" required> Candidate B <br
+        ><input type="radio" name="candidate" value="A" required> Candidate C <br
+    ><input type="radio" name="candidate" value="B">  OTHERS <br><br>
+        <button type="submit">Submit Vote</button>
+    </form>
+
+    <h2>Vote Results</h2>
+    <button id="viewResults">View Results</button>
+    <ul id="results"></ul>
+
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <script>
+        // Connect to Blockchain
+        let web3 = new Web3(Web3.givenProvider || "http://localhost:7545");
+
+        // Example Smart Contract ABI and Address (Replace with yours)
+        const contractABI = [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getResults",
+                "outputs": [
+                    { "condidate 1": "candidate1", "type": "uint256" },
+                    { "condidate 2": "candidate2", "type": "uint256" },
+                    { "condidate 3": "candidate3", "type": "uint256" }, 
+                    { "condidate 4": "candidate4", "type": "uint256" },
+                ],
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [{ "name": "candidate", "type": "string" }],
+                "name": "vote",
+                "outputs": [],
+                "type": "function"
+            }
+        ];1
+
+        const contractAddress = "YOUR_SMART_CONTRACT_ADDRESS"; // voting;
+        const votingContract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Handle Voting
+        document.getElementById('voteForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const candidate = document.querySelector('input[name="candidate"]:checked').value;
+            const accounts = await web3.eth.requestAccounts();
+            
+            votingContract.methods.vote(candidate).send({ from: accounts[0] })
+                .then(() => alert(`Vote for Candidate ${candidate} submitted!`))
+                .catch(err => console.error(err));
+        });
+
+        document.getElementById('viewResults').addEventListener('click', async () => {
+            try {
+                const results = await votingContract.methods.getResults().call();
+                document.getElementById('results').innerHTML = `
+                    <li>Candidate 1: ${results.BJP}</li>
+                    <li>Candidate 2: ${results.CNJ}</li>
+                    <li>Candidate 3: ${results.AAP}</li>
+                    <li>Candidate 4: ${results.BSP}</li>
+                `;
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    </script>
+</body> 
+</html>
